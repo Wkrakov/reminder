@@ -19,8 +19,8 @@ def save_reminders():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state.reminders, f, ensure_ascii=False, indent=2)
 
-st.set_page_config(page_title="Студенческая Напоминалка", layout="wide")
-st.title("📚 Студенческая Напоминалка")
+st.set_page_config(page_title="TimeStudent", layout="wide")
+st.title("📚 TimeStudent")
 st.markdown("---")
 
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
