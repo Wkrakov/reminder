@@ -3,17 +3,52 @@ import json
 import os
 from datetime import datetime, timedelta
 
-# Инициализация session_state
+# 🎨 Кастомные стили с твоими цветами
+st.markdown("""
+    <style>
+    .main .block-container {
+        padding-top: 2rem;
+        background: linear-gradient(135deg, #FFED86 0%, #E8EBFF 100%);
+    }
+    .stButton > button {
+        background-color: #949CFF;
+        color: white;
+        border-radius: 10px;
+        border: none;
+        height: 38px;
+    }
+    .stButton > button:hover {
+        background-color: #7A85E0;
+        color: white;
+    }
+    .stTextInput > div > div > input {
+        border-radius: 10px;
+        border: 2px solid #949CFF;
+    }
+    .stSelectbox > div > div > select {
+        border-radius: 10px;
+        border: 2px solid #949CFF;
+    }
+    h1 {
+        color: #1A1A2E !important;
+        font-family: 'sans-serif';
+    }
+    .stMarkdown {
+        color: #1A1A2E;
+    }
+    </style>
+""", unsafe_allow_html=True)
+
+# Инициализация
 if 'reminders' not in st.session_state:
     st.session_state.reminders = []
-    # Загрузка при первом запуске
     DATA_FILE = "reminders.json"
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r", encoding="utf-8") as f:
                 st.session_state.reminders = json.load(f)
         except:
-            st.session_state.reminders = []
+            pass
 
 def save_reminders():
     DATA_FILE = "reminders.json"
@@ -21,13 +56,23 @@ def save_reminders():
         json.dump(st.session_state.reminders, f, ensure_ascii=False, indent=2)
 
 st.set_page_config(page_title="Студенческая Напоминалка", layout="wide")
-st.title("📚 Студенческая Напоминалка")
+
+# Заголовок с градиентом
+st.markdown("""
+    <h1 style='text-align: center; color: #949CFF; 
+                background: linear-gradient(90deg, #949CFF, #FFED86); 
+                -webkit-background-clip: text; 
+                -webkit-text-fill-color: transparent;'>
+    📚 Студенческая Напоминалка
+    </h1>
+""", unsafe_allow_html=True)
 st.markdown("---")
 
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
 
-# Боковая панель с фильтром
+# Боковая панель
 st.sidebar.header("🔍 Фильтр")
+st.sidebar.markdown("---")
 filter_cat = st.sidebar.selectbox("Категория:", ["Все"] + CATEGORIES)
 
 # Форма добавления
@@ -47,7 +92,7 @@ with col5:
     if st.button("➕ Добавить", use_container_width=True):
         if text and date_str:
             try:
-                dt = datetime.strptime(date_str, "%Y-%m-%d %H:%M")
+                dt = datetime.strptime(date_str, "%Y-%m-%d %H:%М")
                 reminder = {
                     "id": len(st.session_state.reminders) + 1,
                     "text": text,
@@ -65,7 +110,7 @@ with col5:
         else:
             st.warning("⚠️ Заполните все поля!")
 
-# ✅ ИСПРАВЛЕННЫЙ список с УДАЛЕНИЕМ
+# Список напоминаний
 st.header("📋 Напоминания")
 filtered_reminders = [r for r in st.session_state.reminders 
                      if filter_cat == "Все" or r["category"] == filter_cat]
@@ -73,14 +118,12 @@ filtered_reminders = [r for r in st.session_state.reminders
 if not filtered_reminders:
     st.info("😊 Нет напоминаний")
 else:
-    # Сортировка по дате
     filtered_reminders.sort(key=lambda x: x["datetime"])
     
-    for i, r in enumerate(filtered_reminders):
+    for r in filtered_reminders:
         with st.container():
             col1, col2, col3, col4 = st.columns([1, 4, 2, 1])
             
-            # ✅ Чекбокс выполненной задачи
             with col1:
                 if st.checkbox("✓", key=f"done_{r['id']}", value=r["done"]):
                     for rem in st.session_state.reminders:
@@ -89,7 +132,6 @@ else:
                     save_reminders()
                     st.rerun()
             
-            # Текст напоминания
             with col2:
                 status = "✅" if r["done"] else "⏳"
                 repeat_icon = {"daily": "🔄", "weekly": "📅", "none": ""}[r["repeat"]]
@@ -98,13 +140,14 @@ else:
             with col3:
                 st.caption(f"Повтор: {r['repeat']}")
             
-            # ✅ КНОПКА УДАЛЕНИЯ — РАБОТАЕТ!
             with col4:
                 if st.button("🗑️", key=f"delete_{r['id']}"):
                     st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
                     save_reminders()
-                    st.success(f"🗑️ Удалено: {r['text']}")
+                    st.success(f"🗑️ Удалено!")
                     st.rerun()
 
-# Информация о количестве
+# Статистика в сайдбаре
+st.sidebar.markdown("---")
 st.sidebar.markdown(f"**Всего задач:** {len(st.session_state.reminders)}")
+st.sidebar.markdown(f"**Активных:** {len([r for r in st.session_state.reminders if not r['done']])}")
