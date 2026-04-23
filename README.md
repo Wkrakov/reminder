@@ -9,10 +9,4 @@
 - ✅ Фильтрация по категориям
 - ✅ Отметка выполненных задач
 
-## 🚀 Демо
-[Открыть приложение](https://ваш-link.streamlit.app)
 
-## 📱 Локальный запуск
-```bash
-pip install -r requirements.txt
-streamlit run app.py
