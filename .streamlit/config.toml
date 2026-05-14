@@ -1,6 +1,2 @@
-[theme]
-primary = "#674FD3"                # основной фиолетовый для кнопок
-backgroundColor = "#FFFFFF"        # белый фон
-secondaryBackgroundColor = "#F7F5FC" # очень светлый фиолетовый для боковой панели
-textColor = "#1E1A2F"              # тёмный текст
-accentColor = "#CDF43D"            # зелёный для выделений
+[browser]
+gatherUsageStats = false
