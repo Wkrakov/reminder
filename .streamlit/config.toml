@@ -1,6 +1,5 @@
 [theme]
-primary = "#9885E0"          # кнопки, активные элементы
-backgroundColor = "#FFFFFF"  # белый фон (или очень светлый #F9F9F9)
-secondaryBackgroundColor = "#F4743C"  # фон боковой панели или выделенных блоков
-textColor = "#1E1E2F"        # тёмный текст
-accentColor = "#CDF43D"      # акценты (hover, предупреждения)
+primary = "#CDF43D"
+backgroundColor = "#0E0A1F"
+secondaryBackgroundColor = "#1D1535"
+textColor = "#FFFFFF"
