@@ -3,7 +3,6 @@ import json
 import os
 from datetime import datetime, timedelta
 
-# Инициализация БЕЗ стилей
 if 'reminders' not in st.session_state:
     st.session_state.reminders = []
     DATA_FILE = "reminders.json"
