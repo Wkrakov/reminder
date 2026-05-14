@@ -173,6 +173,8 @@ with cols[5]:
                 st.session_state.reminders.append(reminder)
                 save_reminders()
                 st.success("✅ Добавлено!")
+                # Сброс флага при добавлении новой задачи
+                st.session_state.celebration_shown = False
                 st.rerun()
             except ValueError:
                 st.error("❌ Формат: ГГГГ-ММ-ДД ЧЧ:ММ")
@@ -237,14 +239,19 @@ else:
                 st.rerun()
         
         with col5:
-            # Кнопка удаления с уникальным ключом
-            delete_key = f"delete_{r['id']}_{st.session_state.get('rerun_count', 0)}"
-            if st.button("🗑️", key=delete_key):
+            # Упрощенная кнопка удаления без сложных ключей
+            if st.button("🗑️", key=f"delete_{r['id']}"):
+                # Сохраняем текущее состояние до удаления
+                original_count = len(st.session_state.reminders)
                 st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
-                save_reminders()
-                # Сброс флага поздравления при удалении задач
-                st.session_state.celebration_shown = False
-                st.rerun()
+                new_count = len(st.session_state.reminders)
+                
+                if new_count < original_count:  # Проверка, что удаление произошло
+                    save_reminders()
+                    # Сброс флага поздравления при удалении задач
+                    if get_completion_stats()[2] < 100:  # Если прогресс стал меньше 100%
+                        st.session_state.celebration_shown = False
+                    st.rerun()
 
 # Анимация для новых задач
 st.markdown("""
@@ -258,10 +265,6 @@ st.markdown("""
 }
 </style>
 """, unsafe_allow_html=True)
-
-# Счетчик перезапусков для уникальных ключей
-if 'rerun_count' not in st.session_state:
-    st.session_state.rerun_count = 0
 
 # Дополнительная статистика
 st.markdown("---")
@@ -292,6 +295,3 @@ if st.session_state.reminders:
         completed = len([r for r in st.session_state.reminders if r['done']])
         st.write(f"⏳ Активные: {active}")
         st.write(f"✅ Выполненные: {completed}")
-
-# Увеличиваем счетчик перезапусков
-st.session_state.rerun_count += 1
