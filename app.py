@@ -1,7 +1,7 @@
 import streamlit as st
 import json
 import os
-from datetime import datetime, timedelta
+from datetime import datetime
 
 st.set_page_config(page_title="TimeStudent", layout="wide")
 st.title("📚 TimeStudent")
@@ -48,9 +48,10 @@ with col4:
 with col5:
     pass
 
-# Button on a separate row under the fields, centered
-btn_c1, btn_c2, btn_c3 = st.columns([1, 1, 1])
-with btn_c2:
+# Центрированная кнопка под блоками — рабочий вариант.
+# Создаём нечётное число узких колонок и помещаем кнопку в точную центральную колонку.
+cols = st.columns(11)  # 11 — нечётное, центральная колонка index 5
+with cols[5]:
     if st.button("➕ Добавить"):
         if text and date_str:
             try:
