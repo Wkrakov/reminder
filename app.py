@@ -232,14 +232,20 @@ else:
         with col4:
             # Редактирование прогресса - исправлено обновление
             # Определяем текущее значение для слайдера
-            slider_value = r["progress"]
+            current_slider_value = r["progress"]
             if r["done"]:
-                slider_value = 100
+                current_slider_value = 100
             
-            new_progress = st.slider("Изменить прогресс", 0, 100, slider_value, key=f"progress_{r['id']}")
+            # Используем session_state для отслеживания изменений
+            slider_key = f"progress_slider_{r['id']}"
+            if slider_key not in st.session_state:
+                st.session_state[slider_key] = current_slider_value
+            
+            new_progress = st.slider("Изменить прогресс", 0, 100, st.session_state[slider_key], key=slider_key)
             
             # Проверяем, изменилось ли значение
-            if new_progress != slider_value:
+            if new_progress != st.session_state[slider_key]:
+                st.session_state[slider_key] = new_progress
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
                         rem["progress"] = new_progress
@@ -262,6 +268,10 @@ else:
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
                 if new_percentage < 100:
                     st.session_state.celebration_shown = False
+                # Очищаем session_state от удаленного слайдера
+                slider_key_to_remove = f"progress_slider_{r['id']}"
+                if slider_key_to_remove in st.session_state:
+                    del st.session_state[slider_key_to_remove]
                 st.rerun()
 
 # Анимация для новых задач
