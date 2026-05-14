@@ -222,36 +222,49 @@ else:
             st.write(f"{status} **{r['datetime']}** {repeat_icon} **[{r['category']}]** {priority_text} {r['text']}")
         
         with col3:
-            # Прогресс выполнения
-            progress_value = r["progress"] if not r["done"] else 100
+            # Прогресс выполнения - исправлено отображение
+            progress_value = r["progress"]
+            # Если задача выполнена, показываем 100% независимо от значения progress
+            if r["done"]:
+                progress_value = 100
             st.progress(progress_value / 100)
             st.caption(f"Прогресс: {progress_value}%")
         
         with col4:
-            # Редактирование прогресса
-            new_progress = st.slider("Изменить прогресс", 0, 100, progress_value, key=f"progress_{r['id']}")
-            if new_progress != progress_value:
+            # Редактирование прогресса - исправлено обновление
+            current_progress = r["progress"] if not r["done"] else 100
+            new_progress = st.slider("Изменить прогресс", 0, 100, current_progress, key=f"progress_{r['id']}")
+            if new_progress != current_progress:
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
                         rem["progress"] = new_progress
                         rem["done"] = new_progress == 100
+                        # Если прогресс 100%, устанавливаем done в True
+                        if new_progress == 100:
+                            rem["done"] = True
                 save_reminders()
+                # Проверка на достижение 100% после изменения прогресса
+                total_tasks, completed_tasks, new_percentage = get_completion_stats()
+                if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
+                    show_celebration()
                 st.rerun()
         
         with col5:
-            # Упрощенная кнопка удаления без сложных ключей
-            if st.button("🗑️", key=f"delete_{r['id']}"):
-                # Сохраняем текущее состояние до удаления
-                original_count = len(st.session_state.reminders)
-                st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
-                new_count = len(st.session_state.reminders)
+            # Кнопка удаления - упрощенная версия
+            if st.button("🗑️", key=f"delete_{r['id']}", help="Удалить задачу"):
+                # Создаем копию списка для безопасного удаления
+                reminders_to_keep = []
+                for rem in st.session_state.reminders:
+                    if rem["id"] != r["id"]:
+                        reminders_to_keep.append(rem)
                 
-                if new_count < original_count:  # Проверка, что удаление произошло
-                    save_reminders()
-                    # Сброс флага поздравления при удалении задач
-                    if get_completion_stats()[2] < 100:  # Если прогресс стал меньше 100%
-                        st.session_state.celebration_shown = False
-                    st.rerun()
+                st.session_state.reminders = reminders_to_keep
+                save_reminders()
+                # Сброс флага поздравления при удалении задач
+                total_tasks, completed_tasks, new_percentage = get_completion_stats()
+                if new_percentage < 100:
+                    st.session_state.celebration_shown = False
+                st.rerun()
 
 # Анимация для новых задач
 st.markdown("""
