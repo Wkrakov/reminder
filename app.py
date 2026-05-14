@@ -3,9 +3,14 @@ import json
 import os
 from datetime import datetime, timedelta
 
+st.set_page_config(page_title="TimeStudent", layout="wide")
+st.title("📚 TimeStudent")
+st.markdown("---")
+
+DATA_FILE = "reminders.json"
+
 if 'reminders' not in st.session_state:
     st.session_state.reminders = []
-    DATA_FILE = "reminders.json"
     if os.path.exists(DATA_FILE):
         try:
             with open(DATA_FILE, "r", encoding="utf-8") as f:
@@ -14,22 +19,21 @@ if 'reminders' not in st.session_state:
             pass
 
 def save_reminders():
-    DATA_FILE = "reminders.json"
     with open(DATA_FILE, "w", encoding="utf-8") as f:
         json.dump(st.session_state.reminders, f, ensure_ascii=False, indent=2)
 
-st.set_page_config(page_title="TimeStudent", layout="wide")
-st.title("📚 TimeStudent")
-st.markdown("---")
-
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
 
-# Боковая панель
+# Sidebar: filter + stats
 st.sidebar.header("🔍 Фильтр")
 filter_cat = st.sidebar.selectbox("Категория:", ["Все"] + CATEGORIES)
+st.sidebar.markdown("---")
+st.sidebar.metric("Всего", len(st.session_state.reminders))
+st.sidebar.metric("Активных", len([r for r in st.session_state.reminders if not r['done']]))
 
-# Форма добавления
+# Add reminder form
 st.header("➕ Добавить напоминание")
+
 col1, col2 = st.columns(2)
 with col1:
     text = st.text_input("Задача:", placeholder="Например: Выучить HSK 4")
@@ -42,6 +46,11 @@ with col3:
 with col4:
     repeat = st.selectbox("Повтор:", ["none", "daily", "weekly"])
 with col5:
+    pass
+
+# Button on a separate row under the fields, centered
+btn_c1, btn_c2, btn_c3 = st.columns([1, 1, 1])
+with btn_c2:
     if st.button("➕ Добавить"):
         if text and date_str:
             try:
@@ -63,7 +72,7 @@ with col5:
         else:
             st.warning("⚠️ Заполните все поля!")
 
-# Список напоминаний
+# Reminders list
 st.header("📋 Напоминания")
 filtered_reminders = [r for r in st.session_state.reminders 
                      if filter_cat == "Все" or r["category"] == filter_cat]
@@ -97,8 +106,3 @@ else:
                 st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
                 save_reminders()
                 st.rerun()
-
-# Статистика
-st.sidebar.markdown("---")
-st.sidebar.metric("Всего", len(st.session_state.reminders))
-st.sidebar.metric("Активных", len([r for r in st.session_state.reminders if not r['done']]))
