@@ -76,20 +76,24 @@ def generate_russian_calendar(year, month):
     header = f"**{RUSSIAN_MONTHS[month]} {year}**\n\n"
     
     # Дни недели
-    weekdays = " ".join([f"{day:>2}" for day in RUSSIAN_WEEKDAYS])
+    weekdays = "|"
+    for day in RUSSIAN_WEEKDAYS:
+        weekdays += f" {day} |"
     calendar_text = header + weekdays + "\n"
+    
+    # Разделительная линия
+    separator = "|" + "|".join(["---" for _ in range(7)]) + "|\n"
+    calendar_text += separator
     
     # Дни месяца
     for week in cal:
-        week_str = ""
+        week_row = "|"
         for day in week:
             if day == 0:
-                week_str += "   "
+                week_row += "   |"
             else:
-                # Проверяем, есть ли задачи на этот день
-                day_str = f"{day:>2}"
-                week_str += f"{day_str} "
-        calendar_text += week_str + "\n"
+                week_row += f" {day:>2} |"
+        calendar_text += week_row + "\n"
     
     return calendar_text
 
