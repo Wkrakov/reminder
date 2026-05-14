@@ -21,6 +21,15 @@ PRIORITY_COLORS = {
 
 PRIORITY_OPTIONS = list(PRIORITY_COLORS.keys())
 
+# Русские названия месяцев
+RUSSIAN_MONTHS = [
+    "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+    "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
+]
+
+# Русские названия дней недели (сокращенные)
+RUSSIAN_WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
+
 if 'reminders' not in st.session_state:
     st.session_state.reminders = []
     if os.path.exists(DATA_FILE):
@@ -59,6 +68,31 @@ def show_celebration():
     st.balloons()
     st.success(random.choice(celebrations))
 
+def generate_russian_calendar(year, month):
+    """Генерирует календарь на русском языке"""
+    cal = calendar.monthcalendar(year, month)
+    
+    # Заголовок с названием месяца
+    header = f"**{RUSSIAN_MONTHS[month]} {year}**\n\n"
+    
+    # Дни недели
+    weekdays = " ".join([f"{day:>2}" for day in RUSSIAN_WEEKDAYS])
+    calendar_text = header + weekdays + "\n"
+    
+    # Дни месяца
+    for week in cal:
+        week_str = ""
+        for day in week:
+            if day == 0:
+                week_str += "   "
+            else:
+                # Проверяем, есть ли задачи на этот день
+                day_str = f"{day:>2}"
+                week_str += f"{day_str} "
+        calendar_text += week_str + "\n"
+    
+    return calendar_text
+
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
 
 # Sidebar: filter + stats
@@ -79,16 +113,16 @@ st.sidebar.progress(percentage / 100)
 if percentage == 100 and total > 0:
     show_celebration()
 
-# Календарь
+# Календарь на русском
 st.sidebar.markdown("---")
 st.sidebar.header("📅 Календарь")
 current_date = datetime.now()
 year = current_date.year
 month = current_date.month
 
-# Создание календаря
-cal = calendar.month(year, month)
-st.sidebar.text(cal)
+# Создание календаря на русском
+russian_calendar = generate_russian_calendar(year, month)
+st.sidebar.markdown(russian_calendar)
 
 # Add reminder form
 st.header("➕ Добавить напоминание")
