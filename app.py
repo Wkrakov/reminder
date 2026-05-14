@@ -44,7 +44,7 @@ col3, col4, col5 = st.columns(3)
 with col3:
     category = st.selectbox("Категория:", CATEGORIES)
 with col4:
-    repeat = st.selectbox("Повтор:", ["none", "daily", "weekly"])
+    repeat = st.selectbox("Повтор:", ["-", "ежедневно", "еженедельно"])
 with col5:
     pass
 
@@ -96,7 +96,7 @@ else:
         
         with col2:
             status = "✅" if r["done"] else "⏳"
-            repeat_icon = {"daily": "🔄", "weekly": "📅", "none": ""}[r["repeat"]]
+            repeat_icon = {"ежедневно": "🔄", "еженедельно": "📅", "-": ""}[r["repeat"]]
             st.write(f"{status} **{r['datetime']}** {repeat_icon} **[{r['category']}]** {r['text']}")
         
         with col3:
