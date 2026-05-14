@@ -173,8 +173,6 @@ with cols[5]:
                 st.session_state.reminders.append(reminder)
                 save_reminders()
                 st.success("✅ Добавлено!")
-                # Сброс флага при добавлении новой задачи
-                st.session_state.celebration_shown = False
                 st.rerun()
             except ValueError:
                 st.error("❌ Формат: ГГГГ-ММ-ДД ЧЧ:ММ")
@@ -222,56 +220,26 @@ else:
             st.write(f"{status} **{r['datetime']}** {repeat_icon} **[{r['category']}]** {priority_text} {r['text']}")
         
         with col3:
-            # Прогресс выполнения - исправлено отображение
-            display_progress = r["progress"]
-            if r["done"]:
-                display_progress = 100
-            st.progress(display_progress / 100)
-            st.caption(f"Прогресс: {display_progress}%")
+            # Прогресс выполнения
+            progress_value = r["progress"] if not r["done"] else 100
+            st.progress(progress_value / 100)
+            st.caption(f"Прогресс: {progress_value}%")
         
         with col4:
-            # Редактирование прогресса - исправлено обновление
-            # Определяем текущее значение для слайдера
-            current_slider_value = r["progress"]
-            if r["done"]:
-                current_slider_value = 100
-            
-            # Используем session_state для отслеживания изменений
-            slider_key = f"progress_slider_{r['id']}"
-            if slider_key not in st.session_state:
-                st.session_state[slider_key] = current_slider_value
-            
-            new_progress = st.slider("Изменить прогресс", 0, 100, st.session_state[slider_key], key=slider_key)
-            
-            # Проверяем, изменилось ли значение
-            if new_progress != st.session_state[slider_key]:
-                st.session_state[slider_key] = new_progress
+            # Редактирование прогресса
+            new_progress = st.slider("Изменить прогресс", 0, 100, progress_value, key=f"progress_{r['id']}")
+            if new_progress != progress_value:
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
                         rem["progress"] = new_progress
-                        rem["done"] = (new_progress == 100)
-                
+                        rem["done"] = new_progress == 100
                 save_reminders()
-                # Проверка на достижение 100% после изменения прогресса
-                total_tasks, completed_tasks, new_percentage = get_completion_stats()
-                if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
-                    show_celebration()
                 st.rerun()
         
         with col5:
-            # Кнопка удаления
-            if st.button("🗑️", key=f"delete_{r['id']}", help="Удалить задачу"):
-                # Удаление задачи
+            if st.button("🗑️", key=f"delete_{r['id']}"):
                 st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
                 save_reminders()
-                # Сброс флага поздравления при удалении задач
-                total_tasks, completed_tasks, new_percentage = get_completion_stats()
-                if new_percentage < 100:
-                    st.session_state.celebration_shown = False
-                # Очищаем session_state от удаленного слайдера
-                slider_key_to_remove = f"progress_slider_{r['id']}"
-                if slider_key_to_remove in st.session_state:
-                    del st.session_state[slider_key_to_remove]
                 st.rerun()
 
 # Анимация для новых задач
