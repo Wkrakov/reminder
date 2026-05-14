@@ -39,10 +39,9 @@ if 'reminders' not in st.session_state:
         except:
             pass
 
-# Статистика выполнения
-if 'completed_count' not in st.session_state:
-    st.session_state.completed_count = 0
-    st.session_state.total_tasks = len(st.session_state.reminders)
+# Флаг для отслеживания показа анимации
+if 'celebration_shown' not in st.session_state:
+    st.session_state.celebration_shown = False
 
 def save_reminders():
     with open(DATA_FILE, "w", encoding="utf-8") as f:
@@ -67,6 +66,7 @@ def show_celebration():
     ]
     st.balloons()
     st.success(random.choice(celebrations))
+    st.session_state.celebration_shown = True
 
 def generate_russian_calendar(year, month):
     """Генерирует календарь на русском языке"""
@@ -114,8 +114,14 @@ st.sidebar.metric("Прогресс", f"{percentage:.1f}%")
 
 # Прогресс-бар
 st.sidebar.progress(percentage / 100)
-if percentage == 100 and total > 0:
+
+# Показываем поздравление только один раз при достижении 100%
+if percentage == 100 and total > 0 and not st.session_state.celebration_shown:
     show_celebration()
+
+# Сброс флага поздравления, если прогресс упал ниже 100%
+if percentage < 100:
+    st.session_state.celebration_shown = False
 
 # Календарь на русском
 st.sidebar.markdown("---")
@@ -191,15 +197,19 @@ else:
         col1, col2, col3, col4, col5 = st.columns([1, 3, 2, 2, 1])
         
         with col1:
-            if st.checkbox("✓", key=f"done_{r['id']}", value=r["done"]):
+            done_checkbox = st.checkbox("✓", key=f"done_{r['id']}", value=r["done"])
+            if done_checkbox != r["done"]:
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
-                        rem["done"] = True
-                        rem["progress"] = 100
+                        rem["done"] = done_checkbox
+                        if done_checkbox:  # Если задача выполнена
+                            rem["progress"] = 100
+                        else:  # Если задача снова активна
+                            rem["progress"] = 0
                 save_reminders()
-                # Проверка на достижение 100%
+                # Проверка на достижение 100% после изменения статуса
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
-                if new_percentage == 100 and total_tasks > 0:
+                if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
                     show_celebration()
                 st.rerun()
         
