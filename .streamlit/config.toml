@@ -1,5 +1,6 @@
 [theme]
-primary = "#CDF43D"                # кнопки, ссылки, ползунки — кислотно-зелёный
-backgroundColor = "#1A1525"        # тёмный фон (почти чёрный с фиолетовым отливом)
-secondaryBackgroundColor = "#2A2335" # чуть светлее для боковой панели и карточек
-textColor = "#F0EFF4"              # светлый текст
+primary = "#674FD3"                # основной фиолетовый для кнопок
+backgroundColor = "#FFFFFF"        # белый фон
+secondaryBackgroundColor = "#F7F5FC" # очень светлый фиолетовый для боковой панели
+textColor = "#1E1A2F"              # тёмный текст
+accentColor = "#CDF43D"            # зелёный для выделений
