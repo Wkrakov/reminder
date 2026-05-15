@@ -9,7 +9,6 @@ st.set_page_config(page_title="TimeStudent", layout="wide")
 st.title("📚 TimeStudent")
 st.markdown("---")
 
-# Аутентификация пользователя
 st.sidebar.header("👤 Вход")
 if 'current_user' not in st.session_state:
     st.session_state.current_user = None
@@ -29,10 +28,10 @@ else:
         st.session_state.current_user = None
         st.rerun()
 
-# Файл данных для текущего пользователя
+
 DATA_FILE = f"reminders_{st.session_state.current_user}.json"
 
-# Приоритеты с цветами
+
 PRIORITY_COLORS = {
     "низкий": "🟢",
     "средний": "🟡", 
@@ -42,13 +41,13 @@ PRIORITY_COLORS = {
 
 PRIORITY_OPTIONS = list(PRIORITY_COLORS.keys())
 
-# Русские названия месяцев
+
 RUSSIAN_MONTHS = [
     "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
     "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
 ]
 
-# Русские названия дней недели (сокращенные)
+
 RUSSIAN_WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
 if 'reminders' not in st.session_state:
@@ -60,7 +59,6 @@ if 'reminders' not in st.session_state:
         except:
             pass
 
-# Флаг для отслеживания показа анимации
 if 'celebration_shown' not in st.session_state:
     st.session_state.celebration_shown = False
 
@@ -93,20 +91,20 @@ def generate_russian_calendar(year, month):
     """Генерирует календарь на русском языке"""
     cal = calendar.monthcalendar(year, month)
     
-    # Заголовок с названием месяца
+   
     header = f"**{RUSSIAN_MONTHS[month]} {year}**\n\n"
     
-    # Дни недели
+    
     weekdays = "|"
     for day in RUSSIAN_WEEKDAYS:
         weekdays += f" {day} |"
     calendar_text = header + weekdays + "\n"
     
-    # Разделительная линия
+    
     separator = "|" + "|".join(["---" for _ in range(7)]) + "|\n"
     calendar_text += separator
     
-    # Дни месяца
+    
     for week in cal:
         week_row = "|"
         for day in week:
@@ -120,12 +118,12 @@ def generate_russian_calendar(year, month):
 
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
 
-# Sidebar: filter + stats
+
 st.sidebar.header("🔍 Фильтр")
 filter_cat = st.sidebar.selectbox("Категория:", ["Все"] + CATEGORIES)
 filter_priority = st.sidebar.selectbox("Приоритет:", ["Все"] + PRIORITY_OPTIONS)
 
-# Статистика
+
 st.sidebar.markdown("---")
 st.sidebar.header("📊 Статистика")
 total, completed, percentage = get_completion_stats()
@@ -133,29 +131,28 @@ st.sidebar.metric("Всего задач", total)
 st.sidebar.metric("Выполнено", completed)
 st.sidebar.metric("Прогресс", f"{percentage:.1f}%")
 
-# Прогресс-бар
+
 st.sidebar.progress(percentage / 100)
 
-# Показываем поздравление только один раз при достижении 100%
+
 if percentage == 100 and total > 0 and not st.session_state.celebration_shown:
     show_celebration()
 
-# Сброс флага поздравления, если прогресс упал ниже 100%
 if percentage < 100:
     st.session_state.celebration_shown = False
 
-# Календарь на русском
+
 st.sidebar.markdown("---")
 st.sidebar.header("📅 Календарь")
 current_date = datetime.now()
 year = current_date.year
 month = current_date.month
 
-# Создание календаря на русском
+
 russian_calendar = generate_russian_calendar(year, month)
 st.sidebar.markdown(russian_calendar)
 
-# Add reminder form
+
 st.header("➕ Добавить напоминание")
 
 col1, col2 = st.columns(2)
@@ -174,7 +171,7 @@ with col5:
 with col6:
     progress = st.slider("Прогресс (%)", 0, 100, 0)
 
-# Центрированная кнопка под блоками
+
 cols = st.columns(11)
 with cols[5]:
     if st.button("➕ Добавить"):
@@ -190,12 +187,12 @@ with cols[5]:
                     "priority": priority,
                     "progress": progress,
                     "done": progress == 100,
-                    "user": st.session_state.current_user  # Добавляем информацию о пользователе
+                    "user": st.session_state.current_user  
                 }
                 st.session_state.reminders.append(reminder)
                 save_reminders()
                 st.success("✅ Добавлено!")
-                # Сброс флага при добавлении новой задачи
+                
                 st.session_state.celebration_shown = False
                 st.rerun()
             except ValueError:
@@ -203,9 +200,9 @@ with cols[5]:
         else:
             st.warning("⚠️ Заполните все поля!")
 
-# Reminders list
+
 st.header("📋 Напоминания")
-# Фильтруем только задачи текущего пользователя
+
 user_reminders = [r for r in st.session_state.reminders if r.get('user', '') == st.session_state.current_user]
 filtered_reminders = [r for r in user_reminders 
                      if (filter_cat == "Все" or r["category"] == filter_cat) and
@@ -217,7 +214,7 @@ else:
     filtered_reminders.sort(key=lambda x: (x["priority"], x["datetime"]))
     
     for r in filtered_reminders:
-        # Цветовая идентификация по приоритету
+       
         priority_color = PRIORITY_COLORS.get(r["priority"], "⚪")
         
         col1, col2, col3, col4, col5 = st.columns([1, 3, 2, 2, 1])
@@ -228,12 +225,12 @@ else:
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
                         rem["done"] = done_checkbox
-                        if done_checkbox:  # Если задача выполнена
+                        if done_checkbox:  
                             rem["progress"] = 100
-                        else:  # Если задача снова активна
+                        else:  
                             rem["progress"] = 0
                 save_reminders()
-                # Проверка на достижение 100% после изменения статуса
+                
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
                 if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
                     show_celebration()
@@ -246,7 +243,7 @@ else:
             st.write(f"{status} **{r['datetime']}** {repeat_icon} **[{r['category']}]** {priority_text} {r['text']}")
         
         with col3:
-            # Прогресс выполнения - исправлено отображение
+            
             display_progress = r["progress"]
             if r["done"]:
                 display_progress = 100
@@ -254,20 +251,19 @@ else:
             st.caption(f"Прогресс: {display_progress}%")
         
         with col4:
-            # Редактирование прогресса - исправлено обновление
-            # Определяем текущее значение для слайдера
+            
             current_slider_value = r["progress"]
             if r["done"]:
                 current_slider_value = 100
             
-            # Используем session_state для отслеживания изменений
+            
             slider_key = f"progress_slider_{r['id']}"
             if slider_key not in st.session_state:
                 st.session_state[slider_key] = current_slider_value
             
             new_progress = st.slider("Изменить прогресс", 0, 100, st.session_state[slider_key], key=slider_key)
             
-            # Проверяем, изменилось ли значение
+            
             if new_progress != st.session_state[slider_key]:
                 st.session_state[slider_key] = new_progress
                 for rem in st.session_state.reminders:
@@ -276,29 +272,29 @@ else:
                         rem["done"] = (new_progress == 100)
                 
                 save_reminders()
-                # Проверка на достижение 100% после изменения прогресса
+                
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
                 if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
                     show_celebration()
                 st.rerun()
         
         with col5:
-            # Кнопка удаления
+            
             if st.button("🗑️", key=f"delete_{r['id']}", help="Удалить задачу"):
-                # Удаление задачи
+                
                 st.session_state.reminders = [rem for rem in st.session_state.reminders if rem["id"] != r["id"]]
                 save_reminders()
-                # Сброс флага поздравления при удалении задач
+               
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
                 if new_percentage < 100:
                     st.session_state.celebration_shown = False
-                # Очищаем session_state от удаленного слайдера
+                
                 slider_key_to_remove = f"progress_slider_{r['id']}"
                 if slider_key_to_remove in st.session_state:
                     del st.session_state[slider_key_to_remove]
                 st.rerun()
 
-# Анимация для новых задач
+
 st.markdown("""
 <style>
 @keyframes fadeIn {
@@ -311,13 +307,13 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Дополнительная статистика
+
 st.markdown("---")
 st.header("📈 Детальная статистика")
 
 user_reminders_stats = [r for r in st.session_state.reminders if r.get('user', '') == st.session_state.current_user]
 if user_reminders_stats:
-    # Распределение по приоритетам
+    
     priority_stats = {}
     for priority in PRIORITY_OPTIONS:
         priority_stats[priority] = len([r for r in user_reminders_stats if r['priority'] == priority])
