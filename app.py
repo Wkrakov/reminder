@@ -11,7 +11,6 @@ st.markdown("---")
 
 DATA_FILE = "reminders.json"
 
-# Приоритеты с цветами
 PRIORITY_COLORS = {
     "низкий": "🟢",
     "средний": "🟡", 
@@ -21,13 +20,11 @@ PRIORITY_COLORS = {
 
 PRIORITY_OPTIONS = list(PRIORITY_COLORS.keys())
 
-# Русские названия месяцев
 RUSSIAN_MONTHS = [
     "", "Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
     "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
 ]
 
-# Русские названия дней недели (сокращенные)
 RUSSIAN_WEEKDAYS = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"]
 
 if 'reminders' not in st.session_state:
@@ -39,7 +36,6 @@ if 'reminders' not in st.session_state:
         except:
             pass
 
-# Флаг для отслеживания показа анимации
 if 'celebration_shown' not in st.session_state:
     st.session_state.celebration_shown = False
 
@@ -72,20 +68,16 @@ def generate_russian_calendar(year, month):
     """Генерирует календарь на русском языке"""
     cal = calendar.monthcalendar(year, month)
     
-    # Заголовок с названием месяца
     header = f"**{RUSSIAN_MONTHS[month]} {year}**\n\n"
     
-    # Дни недели
     weekdays = "|"
     for day in RUSSIAN_WEEKDAYS:
         weekdays += f" {day} |"
     calendar_text = header + weekdays + "\n"
     
-    # Разделительная линия
     separator = "|" + "|".join(["---" for _ in range(7)]) + "|\n"
     calendar_text += separator
     
-    # Дни месяца
     for week in cal:
         week_row = "|"
         for day in week:
@@ -99,12 +91,10 @@ def generate_russian_calendar(year, month):
 
 CATEGORIES = ["учёба", "экзамены", "личное", "прочее"]
 
-# Sidebar: filter + stats
 st.sidebar.header("🔍 Фильтр")
 filter_cat = st.sidebar.selectbox("Категория:", ["Все"] + CATEGORIES)
 filter_priority = st.sidebar.selectbox("Приоритет:", ["Все"] + PRIORITY_OPTIONS)
 
-# Статистика
 st.sidebar.markdown("---")
 st.sidebar.header("📊 Статистика")
 total, completed, percentage = get_completion_stats()
@@ -112,29 +102,23 @@ st.sidebar.metric("Всего задач", total)
 st.sidebar.metric("Выполнено", completed)
 st.sidebar.metric("Прогресс", f"{percentage:.1f}%")
 
-# Прогресс-бар
 st.sidebar.progress(percentage / 100)
 
-# Показываем поздравление только один раз при достижении 100%
 if percentage == 100 and total > 0 and not st.session_state.celebration_shown:
     show_celebration()
 
-# Сброс флага поздравления, если прогресс упал ниже 100%
 if percentage < 100:
     st.session_state.celebration_shown = False
 
-# Календарь на русском
 st.sidebar.markdown("---")
 st.sidebar.header("📅 Календарь")
 current_date = datetime.now()
 year = current_date.year
 month = current_date.month
 
-# Создание календаря на русском
 russian_calendar = generate_russian_calendar(year, month)
 st.sidebar.markdown(russian_calendar)
 
-# Add reminder form
 st.header("➕ Добавить напоминание")
 
 col1, col2 = st.columns(2)
@@ -153,7 +137,6 @@ with col5:
 with col6:
     progress = st.slider("Прогресс (%)", 0, 100, 0)
 
-# Центрированная кнопка под блоками
 cols = st.columns(11)
 with cols[5]:
     if st.button("➕ Добавить"):
@@ -179,7 +162,6 @@ with cols[5]:
         else:
             st.warning("⚠️ Заполните все поля!")
 
-# Reminders list
 st.header("📋 Напоминания")
 filtered_reminders = [r for r in st.session_state.reminders 
                      if (filter_cat == "Все" or r["category"] == filter_cat) and
@@ -191,7 +173,7 @@ else:
     filtered_reminders.sort(key=lambda x: (x["priority"], x["datetime"]))
     
     for r in filtered_reminders:
-        # Цветовая идентификация по приоритету
+        
         priority_color = PRIORITY_COLORS.get(r["priority"], "⚪")
         
         col1, col2, col3, col4, col5 = st.columns([1, 3, 2, 2, 1])
@@ -202,12 +184,12 @@ else:
                 for rem in st.session_state.reminders:
                     if rem["id"] == r["id"]:
                         rem["done"] = done_checkbox
-                        if done_checkbox:  # Если задача выполнена
+                        if done_checkbox:  
                             rem["progress"] = 100
-                        else:  # Если задача снова активна
+                        else:  
                             rem["progress"] = 0
                 save_reminders()
-                # Проверка на достижение 100% после изменения статуса
+               
                 total_tasks, completed_tasks, new_percentage = get_completion_stats()
                 if new_percentage == 100 and total_tasks > 0 and not st.session_state.celebration_shown:
                     show_celebration()
@@ -220,13 +202,13 @@ else:
             st.write(f"{status} **{r['datetime']}** {repeat_icon} **[{r['category']}]** {priority_text} {r['text']}")
         
         with col3:
-            # Прогресс выполнения
+           
             progress_value = r["progress"] if not r["done"] else 100
             st.progress(progress_value / 100)
             st.caption(f"Прогресс: {progress_value}%")
         
         with col4:
-            # Редактирование прогресса
+            
             new_progress = st.slider("Изменить прогресс", 0, 100, progress_value, key=f"progress_{r['id']}")
             if new_progress != progress_value:
                 for rem in st.session_state.reminders:
@@ -242,7 +224,7 @@ else:
                 save_reminders()
                 st.rerun()
 
-# Анимация для новых задач
+
 st.markdown("""
 <style>
 @keyframes fadeIn {
@@ -255,12 +237,12 @@ st.markdown("""
 </style>
 """, unsafe_allow_html=True)
 
-# Дополнительная статистика
+
 st.markdown("---")
 st.header("📈 Детальная статистика")
 
 if st.session_state.reminders:
-    # Распределение по приоритетам
+    
     priority_stats = {}
     for priority in PRIORITY_OPTIONS:
         priority_stats[priority] = len([r for r in st.session_state.reminders if r['priority'] == priority])
